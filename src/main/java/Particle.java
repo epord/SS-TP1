@@ -1,5 +1,7 @@
 public interface Particle {
 
-    public double getRadius();
+    double getRadius();
+    double getX();
+    double getY();
 
 }
