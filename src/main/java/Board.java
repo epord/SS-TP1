@@ -31,11 +31,13 @@ public class Board {
 	}
 
 	public Collection<Cell> getAdyacentCells(Cell cell) {
-		ArrayList<Cell> adyacentCells = new ArrayList<Cell>();
+		ArrayList<Cell> adyacentCells = new ArrayList<>();
 		if (isPeriodic) {
-			for (int x = (cell.getX() - 1 + m) % m; x <= (cell.getX() + 1) % m; x++) {
-				for (int y = (cell.getY() - 1 + m) % m; y <= (cell.getY() + 1) % m; y++) {
-					adyacentCells.add(cells.get(y).get(x));
+			int x =(cell.getX() - 1 + m) % m;
+			for (int xCounter = 0; xCounter < 3; xCounter++) {
+				int y =(cell.getY() - 1 + m) % m;
+				for (int yCounter = 0; yCounter < 3; yCounter++) {
+					adyacentCells.add(cells.get((y + yCounter)%m).get((x + xCounter)%m));
 				}
 			}
 		} else {

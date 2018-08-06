@@ -8,19 +8,19 @@ public class Main {
     public static void main(String[] args) {
 
     	int n = 100;
-    	int m = 10;
-    	double l = 100.0;
-    	boolean isPeriodic = false;
+    	int m = 5;
+    	double l = 20.0;
+    	boolean isPeriodic = true;
 
-    	double rc = 7.0;
-    	double maxParticleRadius = 1.0;
+    	double rc = 3.0;
+    	double maxParticleRadius = 0.3;
 
 		if (l/m < rc + 2*maxParticleRadius) {
 			throw new IllegalStateException("L/M < rc + 2r");
 		}
 
     	Board board = new Board(m, l, isPeriodic);
-    	Random random = new Random(1);
+    	Random random = new Random(3);
     	List<Particle> particles = generateParticles(n, l, rc, maxParticleRadius, random);
     	board.addParticles(particles);
 
@@ -28,6 +28,8 @@ public class Main {
 		System.out.println(n);
 		System.out.println(l);
 
+		System.out.println("Dinámico:");
+		System.out.println("t0");
 		particles.forEach(System.out::println);
 
 		System.out.println("Partículas adyacentes a id=0");
