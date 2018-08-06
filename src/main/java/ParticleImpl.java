@@ -8,6 +8,7 @@ public class ParticleImpl implements Particle{
     private double y;
 
     public ParticleImpl(int id, double radius, double interactionRadius, double x, double y) {
+    	this.id = id;
         this.radius = radius;
         this.interactionRadius = interactionRadius;
         this.x = x;

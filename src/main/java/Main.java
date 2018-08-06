@@ -20,7 +20,7 @@ public class Main {
 		}
 
     	Board board = new Board(m, l, isPeriodic);
-    	Random random = new Random(3);
+    	Random random = new Random(4);
     	List<Particle> particles = generateParticles(n, l, rc, maxParticleRadius, random);
     	board.addParticles(particles);
 

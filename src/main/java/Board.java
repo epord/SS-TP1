@@ -33,11 +33,11 @@ public class Board {
 	public Collection<Cell> getAdyacentCells(Cell cell) {
 		ArrayList<Cell> adyacentCells = new ArrayList<>();
 		if (isPeriodic) {
-			int x =(cell.getX() - 1 + m) % m;
+			int x = (cell.getX() - 1 + m) % m;
 			for (int xCounter = 0; xCounter < 3; xCounter++) {
-				int y =(cell.getY() - 1 + m) % m;
+				int y = (cell.getY() - 1 + m) % m;
 				for (int yCounter = 0; yCounter < 3; yCounter++) {
-					adyacentCells.add(cells.get((y + yCounter)%m).get((x + xCounter)%m));
+					adyacentCells.add(cells.get((y + yCounter) % m).get((x + xCounter) % m));
 				}
 			}
 		} else {
@@ -73,7 +73,7 @@ public class Board {
 		List<Particle> particles = new ArrayList<>();
 		adjacent.stream().forEach(
 				cell -> {
-					cell.getParticles().stream().filter(p -> particle.isInteractingWith(p)).forEach(p -> particles.add(p));
+					cell.getParticles().stream().filter(p -> isParticleInteractingWith(particle, p)).forEach(p -> particles.add(p));
 				}
 		);
 		return particles;
@@ -84,11 +84,39 @@ public class Board {
 		cells.stream().forEach(
 				list -> list.stream().forEach(
 						cell -> {
-							cell.getParticles().stream().filter(p -> particle.isInteractingWith(p)).forEach(p -> particles.add(p));
+							cell.getParticles().stream().filter(p -> isParticleInteractingWith(particle, p)).forEach(p -> particles.add(p));
 						}
 				)
 		);
 		return particles;
+	}
+
+	public boolean isParticleInteractingWith(Particle p1, Particle p2) {
+		if (!isPeriodic) {
+			return p1.isInteractingWith(p2);
+		} else {
+			Cell p1Cell = getParticleCell(p1);
+			Cell p2Cell = getParticleCell(p2);
+
+			double projectedX = p2.getX();
+			double projectedY = p2.getY();
+
+			if (p2Cell.getX() == (p1Cell.getX() + 1) % m && p1Cell.getX() == m - 1) {
+				projectedX += l;
+			}
+			if (p2Cell.getY() == (p1Cell.getY() + 1) % m && p1Cell.getY() == m - 1) {
+				projectedY += l;
+			}
+			if ((p2Cell.getX() + 1) % m == p1Cell.getX() && p1Cell.getX() == 0) {
+				projectedX -= l;
+			}
+			if ((p2Cell.getY() + 1) % m == p1Cell.getY() && p1Cell.getY() == 0) {
+				projectedY -= l;
+			}
+
+			double distance = Math.sqrt(Math.pow((p1.getX() - projectedX), 2) + Math.pow((p1.getY() - projectedY), 2));
+			return distance < p1.getRadius() + p2.getRadius() + p1.getInteractionRadius();
+		}
 	}
 
 }
