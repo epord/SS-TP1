@@ -6,8 +6,12 @@
         <sourceOutputDir name="target/generated-sources/annotations" />
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
+        <module name="cell-index-method" />
         <module name="cellindexmethod" />
       </profile>
     </annotationProcessing>
+    <bytecodeTargetLevel>
+      <module name="cell-index-method" target="1.5" />
+    </bytecodeTargetLevel>
   </component>
 </project>

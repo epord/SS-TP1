@@ -28,4 +28,9 @@ public class ParticleImpl implements Particle{
     public double getY() {
         return y;
     }
+
+    public boolean isInteractingWith(Particle other) {
+		double distance = Math.sqrt(Math.pow((this.getX() - other.getX()), 2) + Math.pow((this.getY() - other.getY()), 2));
+		return distance < this.getRadius() + other.getRadius() + this.getInteractionRadius();
+	}
 }
