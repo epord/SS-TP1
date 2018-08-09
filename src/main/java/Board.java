@@ -1,6 +1,4 @@
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 public class Board {
@@ -31,18 +29,23 @@ public class Board {
 	}
 
 	public Collection<Cell> getAdyacentCells(Cell cell) {
+		Set<Cell> cellsSet = new HashSet<>();
 		ArrayList<Cell> adyacentCells = new ArrayList<>();
 		if (isPeriodic) {
 			int x = (cell.getX() - 1 + m) % m;
 			for (int xCounter = 0; xCounter < 3; xCounter++) {
 				int y = (cell.getY() - 1 + m) % m;
 				for (int yCounter = 0; yCounter < 3; yCounter++) {
-					adyacentCells.add(cells.get((y + yCounter) % m).get((x + xCounter) % m));
+					Cell current = cells.get((y + yCounter) % m).get((x + xCounter) % m);
+					if (!cellsSet.contains(current)) {
+						cellsSet.add(current);
+						adyacentCells.add(current);
+					}
 				}
 			}
 		} else {
-			for (int x = cell.getX() - 1 < 0 ? 0 : cell.getX() - 1; x <= (cell.getX() + 1 > m ? m - 1 : cell.getX() + 1); x++) {
-				for (int y = cell.getY() - 1 < 0 ? 0 : cell.getY() - 1; y <= (cell.getY() + 1 > m ? m - 1 : cell.getY() + 1); y++) {
+			for (int x = cell.getX() - 1 < 0 ? 0 : cell.getX() - 1; x <= (cell.getX() + 1 >= m ? m - 1 : cell.getX() + 1); x++) {
+				for (int y = cell.getY() - 1 < 0 ? 0 : cell.getY() - 1; y <= (cell.getY() + 1 >= m ? m - 1 : cell.getY() + 1); y++) {
 					adyacentCells.add(cells.get(y).get(x));
 				}
 			}
@@ -114,8 +117,10 @@ public class Board {
 				projectedY -= l;
 			}
 
-			double distance = Math.sqrt(Math.pow((p1.getX() - projectedX), 2) + Math.pow((p1.getY() - projectedY), 2));
-			return distance < p1.getRadius() + p2.getRadius() + p1.getInteractionRadius();
+			double projectedDistance = Math.sqrt(Math.pow((p1.getX() - projectedX), 2) + Math.pow((p1.getY() - projectedY), 2));
+			double directDistance = Math.sqrt(Math.pow((p1.getX() - p2.getX()), 2) + Math.pow((p1.getY() - p2.getY()), 2));
+
+			return Math.min(projectedDistance, directDistance) < p1.getRadius() + p2.getRadius() + p1.getInteractionRadius();
 		}
 	}
 
