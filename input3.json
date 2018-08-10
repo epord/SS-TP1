@@ -1,7 +1,7 @@
 {
-  "M":5,
+  "M":3,
   "N":6000,
-  "Rc":1.0,
+  "Rc":5.0,
   "isPeriodic":true,
   "selectedParticleID":2601,
   "L":20.0,

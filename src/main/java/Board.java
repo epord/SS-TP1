@@ -3,7 +3,7 @@ import java.util.stream.Collectors;
 
 public class Board {
 
-	private Set<Particle> particles;
+	private Map<Integer, Particle> particles;
 	private List<List<Cell>> cells;
 	private int m;
 	private double l;
@@ -11,7 +11,7 @@ public class Board {
 	private boolean isPeriodic;
 
 	public Board(int m, double l, boolean isPeriodic) {
-		this.particles = new HashSet<>();
+		this.particles = new HashMap<>();
 		generateBoard(m);
 		this.m = m;
 		this.l = l;
@@ -31,17 +31,21 @@ public class Board {
 	}
 
 	public Collection<Cell> getAdyacentCells(Cell cell) {
-		Set<Cell> cellsSet = new HashSet<>();
 		ArrayList<Cell> adyacentCells = new ArrayList<>();
 		if (isPeriodic) {
-			int x = (cell.getX() - 1 + m) % m;
-			for (int xCounter = 0; xCounter < 3; xCounter++) {
-				int y = (cell.getY() - 1 + m) % m;
-				for (int yCounter = 0; yCounter < 3; yCounter++) {
-					Cell current = cells.get((y + yCounter) % m).get((x + xCounter) % m);
-					if (!cellsSet.contains(current)) {
-						cellsSet.add(current);
-						adyacentCells.add(current);
+			for (int x = cell.getX() - 1; x <= cell.getX() + 1; x++) {
+				for (int y = cell.getY() - 1; y <= cell.getY() + 1; y++) {
+					if (x >= 0 && x < m && y >= 0 && y < m) {
+						adyacentCells.add(cells.get(y).get(x));
+					} else {
+						Cell ghostCell = new CellImpl(x, y);
+						Cell current = cells.get((y + m) % m).get((x + m) % m);
+						for (Particle particle : current.getParticles()) {
+							double newX = particle.getX() + (x - current.getX()) * (l/m);
+							double newY = particle.getY() + (y - current.getY()) * (l/m);
+							ghostCell.addParticle(new ParticleImpl(particle.getId(), particle.getRadius(), particle.getInteractionRadius(), newX, newY));
+						}
+						adyacentCells.add(ghostCell);
 					}
 				}
 			}
@@ -66,7 +70,7 @@ public class Board {
 	}
 
 	public void addParticle(Particle particle) {
-		particles.add(particle);
+		particles.put(particle.getId(), particle);
 		getCellFromPosition(particle.getX(), particle.getY()).addParticle(particle);
 	}
 
@@ -77,72 +81,35 @@ public class Board {
 	public Collection<Particle> getInteractingParticles(Particle particle) {
 		Collection<Cell> adjacent = getAdyacentCells(getParticleCell(particle));
 		List<Particle> particles = new ArrayList<>();
-		adjacent.stream().forEach(
-				cell -> {
-					cell.getParticles().stream().filter(p -> isParticleInteractingWith(particle, p)).forEach(p -> particles.add(p));
+		Set<Integer> particleIds = new HashSet<>();
+
+		for (Cell cell: adjacent) {
+			for (Particle p: cell.getParticles()) {
+				if (!particleIds.contains(p.getId())) {
+					if (particle.isInteractingWith(p)) {
+						particleIds.add(p.getId());
+						particles.add(this.particles.get(p.getId()));
+					}
 				}
-		);
+			}
+		}
+
+//		adjacent.forEach(
+//				cell -> {
+//					cell.getParticles().stream().filter(particle::isInteractingWith).forEach( p -> particles.add(this.particles.get(p.getId())));
+//				}
+//		);
 		return particles;
 	}
 
-	public Collection<Particle> getInteractingParticlesBruteForce(Particle particle) {
-		List<Particle> interactingParticles = new LinkedList<>();
-		particles.stream().forEach(p -> {
-			if (isParticleInteractingWith(particle, p)) {
-				interactingParticles.add(p);
-			}
-		});
-		return interactingParticles;
-	}
-
-	public boolean isParticleInteractingWith(Particle p1, Particle p2) {
-		if (!isPeriodic) {
-			return p1.isInteractingWith(p2);
-		} else {
-			Cell p1Cell = getParticleCell(p1);
-			Cell p2Cell = getParticleCell(p2);
-
-			double projectedX = p2.getX();
-			double projectedY = p2.getY();
-
-			int cornerCounter = 0;
-
-			// Si la celda de p1 está en el borde derecho y la p2 se encuentra en una del borde izquierdo
-			if (p2Cell.getX() == (p1Cell.getX() + 1) % m && p1Cell.getX() == m - 1) {
-				projectedX += l;
-				cornerCounter++;
-			}
-			// Si la celda de p1 está en el borde inferior y la p2 se encuentra en una del borde superior
-			if (p2Cell.getY() == (p1Cell.getY() + 1) % m && p1Cell.getY() == m - 1) {
-				projectedY += l;
-				cornerCounter++;
-			}
-			// Si la celda de p1 está en el borde izquierdo y la p2 se encuentra en una del borde derecho
-			if ((p2Cell.getX() + 1) % m == p1Cell.getX() && p1Cell.getX() == 0) {
-				projectedX -= l;
-				cornerCounter++;
-			}
-			// Si la celda de p1 está en el borde superior y la p2 se encuentra en una del borde inferior
-			if ((p2Cell.getY() + 1) % m == p1Cell.getY() && p1Cell.getY() == 0) {
-				projectedY -= l;
-				cornerCounter++;
-			}
-
-			double minDistance;
-			double directDistance = Math.sqrt(Math.pow((p1.getX() - p2.getX()), 2) + Math.pow((p1.getY() - p2.getY()), 2));
-			if (cornerCounter < 2) {
-				double projectedDistance = Math.sqrt(Math.pow((p1.getX() - projectedX), 2) + Math.pow((p1.getY() - projectedY), 2));
-				minDistance = Math.min(projectedDistance, directDistance);
-			} else {
-				List<Double> distances = new LinkedList<>();
-				distances.add(directDistance);
-				distances.add(Math.sqrt(Math.pow(p1.getX() - projectedX, 2) + Math.pow(p1.getY() - projectedY, 2)));
-				distances.add(Math.sqrt(Math.pow(p1.getX() - (projectedX == p2.getX()+l? projectedX-l : projectedX+l), 2) + Math.pow(p1.getY() - projectedY, 2)));
-				distances.add(Math.sqrt(Math.pow(p1.getX() - projectedX, 2) + Math.pow(p1.getY() - (projectedY == p2.getY()+l? projectedY-l : projectedY+l), 2)));
-				minDistance = distances.stream().min(Double::compare).get();
-			}
-			return minDistance < p1.getRadius() + p2.getRadius() + p1.getInteractionRadius();
-		}
-	}
+//	public Collection<Particle> getInteractingParticlesBruteForce(Particle particle) {
+//		List<Particle> interactingParticles = new LinkedList<>();
+//		particles.values().forEach(p -> {
+//			if (particle.isInteractingWith(p)) {
+//				interactingParticles.add(this.particles.get(p.getId()));
+//			}
+//		});
+//		return interactingParticles;
+//	}
 
 }

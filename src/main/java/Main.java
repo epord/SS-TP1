@@ -77,6 +77,11 @@ public class Main {
 		if (l/m < rc + 2*maxParticleRadius) {
 			throw new IllegalStateException("L/M < rc + 2r");
 		}
+
+		if (bruteForce) {
+			m = 1;
+		}
+
 		Board board = new Board(m, l, isPeriodic);
 
     	board.addParticles(particles);
@@ -99,13 +104,10 @@ public class Main {
 			long startTime = System.nanoTime();
 			for (int i = 0; i < particles.size(); i++) {
 				Collection<Particle> neighbors;
-				if (bruteForce) {
-					neighbors = board.getInteractingParticlesBruteForce(particles.get(selectedParticleID));
-				} else {
-					neighbors = board.getInteractingParticles(particles.get(selectedParticleID));
-				}
+				neighbors = board.getInteractingParticles(particles.get(selectedParticleID));
 
 				if (i == selectedParticleID) {
+//					neighbors = board.getInteractingParticles(particles.get(selectedParticleID));
 					particles.forEach(particle -> {
 						try {
 							if (particle.getId() == selectedParticleID) {
