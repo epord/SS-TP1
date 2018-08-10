@@ -65,14 +65,14 @@ public class Main {
 		readParametersFromFile(filename);
 
 		Random random = new Random(24);
-//		n = 1000;
+//		n = 5000;
 //		l = 20.0;
-//		rc = 4.0;
+//		rc = 9.0;
 //		maxParticleRadius= 0.25;
 //		m = 1;
 //		isPeriodic = true;
 //		particles = generateParticles(n, l, rc, maxParticleRadius, random);
-//		generateJSONInput(n, l, rc, maxParticleRadius, random);
+//		generateJSONInput(n, l, m, rc, maxParticleRadius, random);
 
 		if (l/m < rc + 2*maxParticleRadius) {
 			throw new IllegalStateException("L/M < rc + 2r");
@@ -131,21 +131,19 @@ public class Main {
 
 
 
-	public static void generateJSONInput(int n, double l, double rc, double maxParticleRadius, Random random) throws IOException{
+	public static void generateJSONInput(int n, double l, int m, double rc, double maxParticleRadius, Random random) throws IOException{
 		JSONObject obj = new JSONObject();
-		int out_n = 6000;
-		int out_m = 5;
 
-		obj.put("N", out_n);
-		obj.put("L", 20.0);
-		obj.put("M", out_m);
-		obj.put("Rc", 2.0);
+		obj.put("N", n);
+		obj.put("L", l);
+		obj.put("M", m);
+		obj.put("Rc", rc);
 		obj.put("isPeriodic", true);
-		obj.put("selectedParticleID", Math.abs(random.nextInt())%out_n);
+		obj.put("selectedParticleID", Math.abs(random.nextInt())%n);
 
 		JSONArray particle_array = new JSONArray();
 
-		for (int i = 0; i < out_n; i++) {
+		for (int i = 0; i < n; i++) {
 			JSONObject p = new JSONObject();
 
 			double randX = random.nextDouble() * l;
@@ -160,7 +158,7 @@ public class Main {
 		}
 		obj.put("particles", particle_array);
 
-		try (FileWriter file = new FileWriter("input4.json")) {
+		try (FileWriter file = new FileWriter("input.json")) {
 			file.write(obj.toJSONString());
 			System.out.println("Successfully Copied JSON Object to File...");
 		}
