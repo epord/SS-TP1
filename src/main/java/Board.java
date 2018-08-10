@@ -104,23 +104,43 @@ public class Board {
 			double projectedX = p2.getX();
 			double projectedY = p2.getY();
 
+			int cornerCounter = 0;
+
+			// Si la celda de p1 está en el borde derecho y la p2 se encuentra en una del borde izquierdo
 			if (p2Cell.getX() == (p1Cell.getX() + 1) % m && p1Cell.getX() == m - 1) {
 				projectedX += l;
+				cornerCounter++;
 			}
+			// Si la celda de p1 está en el borde inferior y la p2 se encuentra en una del borde superior
 			if (p2Cell.getY() == (p1Cell.getY() + 1) % m && p1Cell.getY() == m - 1) {
 				projectedY += l;
+				cornerCounter++;
 			}
+			// Si la celda de p1 está en el borde izquierdo y la p2 se encuentra en una del borde derecho
 			if ((p2Cell.getX() + 1) % m == p1Cell.getX() && p1Cell.getX() == 0) {
 				projectedX -= l;
+				cornerCounter++;
 			}
+			// Si la celda de p1 está en el borde superior y la p2 se encuentra en una del borde inferior
 			if ((p2Cell.getY() + 1) % m == p1Cell.getY() && p1Cell.getY() == 0) {
 				projectedY -= l;
+				cornerCounter++;
 			}
 
-			double projectedDistance = Math.sqrt(Math.pow((p1.getX() - projectedX), 2) + Math.pow((p1.getY() - projectedY), 2));
+			double minDistance;
 			double directDistance = Math.sqrt(Math.pow((p1.getX() - p2.getX()), 2) + Math.pow((p1.getY() - p2.getY()), 2));
-
-			return Math.min(projectedDistance, directDistance) < p1.getRadius() + p2.getRadius() + p1.getInteractionRadius();
+			if (cornerCounter < 2) {
+				double projectedDistance = Math.sqrt(Math.pow((p1.getX() - projectedX), 2) + Math.pow((p1.getY() - projectedY), 2));
+				minDistance = Math.min(projectedDistance, directDistance);
+			} else {
+				List<Double> distances = new LinkedList<>();
+				distances.add(directDistance);
+				distances.add(Math.sqrt(Math.pow(p1.getX() - projectedX, 2) + Math.pow(p1.getY() - projectedY, 2)));
+				distances.add(Math.sqrt(Math.pow(p1.getX() - (projectedX == p2.getX()+l? projectedX-l : projectedX+l), 2) + Math.pow(p1.getY() - projectedY, 2)));
+				distances.add(Math.sqrt(Math.pow(p1.getX() - projectedX, 2) + Math.pow(p1.getY() - (projectedY == p2.getY()+l? projectedY-l : projectedY+l), 2)));
+				minDistance = distances.stream().min(Double::compare).get();
+			}
+			return minDistance < p1.getRadius() + p2.getRadius() + p1.getInteractionRadius();
 		}
 	}
 
