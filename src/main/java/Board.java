@@ -3,6 +3,7 @@ import java.util.stream.Collectors;
 
 public class Board {
 
+	private Set<Particle> particles;
 	private List<List<Cell>> cells;
 	private int m;
 	private double l;
@@ -10,6 +11,7 @@ public class Board {
 	private boolean isPeriodic;
 
 	public Board(int m, double l, boolean isPeriodic) {
+		this.particles = new HashSet<>();
 		generateBoard(m);
 		this.m = m;
 		this.l = l;
@@ -64,6 +66,7 @@ public class Board {
 	}
 
 	public void addParticle(Particle particle) {
+		particles.add(particle);
 		getCellFromPosition(particle.getX(), particle.getY()).addParticle(particle);
 	}
 
@@ -83,15 +86,13 @@ public class Board {
 	}
 
 	public Collection<Particle> getInteractingParticlesBruteForce(Particle particle) {
-		List<Particle> particles = new ArrayList<>();
-		cells.stream().forEach(
-				list -> list.stream().forEach(
-						cell -> {
-							cell.getParticles().stream().filter(p -> isParticleInteractingWith(particle, p)).forEach(p -> particles.add(p));
-						}
-				)
-		);
-		return particles;
+		List<Particle> interactingParticles = new LinkedList<>();
+		particles.stream().forEach(p -> {
+			if (isParticleInteractingWith(particle, p)) {
+				interactingParticles.add(p);
+			}
+		});
+		return interactingParticles;
 	}
 
 	public boolean isParticleInteractingWith(Particle p1, Particle p2) {
